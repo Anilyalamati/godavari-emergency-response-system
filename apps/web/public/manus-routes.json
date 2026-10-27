@@ -1,0 +1,12 @@
+{
+  "routes": [
+    { "path": "/", "title": "Overview — Godavari" },
+    { "path": "/report", "title": "Report — Godavari" },
+    { "path": "/track", "title": "Track — Godavari" },
+    { "path": "/staff/login", "title": "Staff login — Godavari" },
+    { "path": "/staff/accept-invite", "title": "Accept staff invitation — Godavari" },
+    { "path": "/operator", "title": "Operator — Godavari" },
+    { "path": "/responder", "title": "Responder — Godavari" },
+    { "path": "/admin", "title": "Administrator — Godavari" }
+  ]
+}

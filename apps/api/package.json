@@ -1,0 +1,26 @@
+{
+  "name": "@godavari/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -b",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@godavari/shared": "workspace:*",
+    "@supabase/supabase-js": "2.118.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^22.15.30",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.4",
+    "tsx": "^4.20.5"
+  }
+}

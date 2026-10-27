@@ -1,0 +1,17 @@
+node_modules/
+.pnpm-store/
+**/dist/
+**/coverage/
+**/.vite/
+**/playwright-report/
+**/test-results/
+.env
+.env.*
+!.env.example
+password.txt
+*password*.txt
+*credential*
+*.pem
+*.key
+.DS_Store
+*.log

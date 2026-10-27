@@ -1,0 +1,15 @@
+project_id = "godavari-prototype"
+
+[auth]
+enabled = true
+enable_signup = false
+enable_anonymous_sign_ins = false
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/staff/accept-invite", "http://127.0.0.1:3000/staff/accept-invite"]
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[experimental]
+stack = true

@@ -1,0 +1,46 @@
+{
+  "name": "godavari-emergency-response",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @godavari/shared build && concurrently -k -n api,web -c cyan,magenta \"pnpm --filter @godavari/api dev\" \"pnpm --filter @godavari/web dev\"",
+    "dev:web": "pnpm --filter @godavari/web dev",
+    "dev:api": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/api dev",
+    "build": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/api build && pnpm --filter @godavari/web build",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/api typecheck && pnpm --filter @godavari/web typecheck",
+    "test": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/shared test && pnpm --filter @godavari/api test && pnpm --filter @godavari/web test && pnpm db:smoke",
+    "e2e": "pnpm --filter @godavari/web test:e2e",
+    "health:check": "node scripts/health-check.mjs",
+    "security:bundle": "node scripts/check-browser-secret-bundle.mjs",
+    "db:start": "supabase start --runtime native",
+    "db:start:docker": "supabase start --runtime docker",
+    "db:reset": "supabase db reset --local --yes",
+    "db:seed": "supabase db query --local --file supabase/seed.sql",
+    "db:test": "supabase test db --local",
+    "db:smoke": "node scripts/database-smoke.mjs",
+    "db:stop": "supabase stop",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test && pnpm build && pnpm security:bundle"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.15.30",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^6.1.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.6.2",
+    "supabase": "2.122.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.0",
+    "vitest": "^3.2.4"
+  }
+}
