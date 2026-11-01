@@ -1,13 +1,9 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import type { StaffRole } from '@godavari/shared';
 import { useStaffAuth } from '../auth/AuthContext.js';
+import { useLanguage } from '../i18n/LanguageContext.js';
+import { LanguageSwitcher } from './LanguageSwitcher.js';
 import { ApiStatus } from './ApiStatus.js';
-
-const publicNavigation = [
-  { to: '/', label: 'Overview', end: true },
-  { to: '/report', label: 'Report', end: false },
-  { to: '/track', label: 'Track', end: false },
-];
 
 const roleNavigation: Record<StaffRole, { to: string; label: string }> = {
   OPERATOR: { to: '/operator', label: 'Operator workspace' },
@@ -17,8 +13,15 @@ const roleNavigation: Record<StaffRole, { to: string; label: string }> = {
 
 export function SiteLayout() {
   const { status, profile, signOut } = useStaffAuth();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const isSignedIn = status === 'signed-in' && profile !== null;
+
+  const publicNavigation = [
+    { to: '/', label: t.navOverview, end: true },
+    { to: '/report', label: t.navReport, end: false },
+    { to: '/track', label: t.navTrack, end: false },
+  ];
 
   async function handleSignOut() {
     await signOut();
@@ -36,31 +39,41 @@ export function SiteLayout() {
           !
         </span>
         <p>
-          <strong>Hackathon prototype — not an emergency service.</strong> This site cannot request
-          or guarantee help. For urgent assistance, use a phone to call 112 if telephone coverage is
-          available.
+          <strong>{t.safetyAlertTitle}</strong> {t.safetyAlertText}
         </p>
         <a
           className="safety-call-link"
           href="tel:112"
           aria-label="Call 112 using your phone dialer"
         >
-          Call 112 <span aria-hidden="true">↗</span>
+          {t.safetyCallBtn} <span aria-hidden="true">↗</span>
         </a>
       </aside>
+
+      {language === 'te' && (
+        <aside className="telugu-review-banner" role="note" aria-label="భాష సమీక్ష నోటీసు">
+          <span className="safety-icon" aria-hidden="true">
+            ℹ
+          </span>
+          <p>{t.teluguReviewDisclaimer}</p>
+        </aside>
+      )}
 
       <header className="masthead">
         <div className="masthead-top">
           <NavLink className="brand" to="/" aria-label="Godavari coordination prototype home">
             <img src="/godavari-mark.svg" alt="" width="42" height="42" />
             <span className="brand-copy">
-              <span className="brand-name">GODAVARI</span>
-              <span className="brand-caption">COORDINATION PROTOTYPE</span>
+              <span className="brand-name">{t.brandName}</span>
+              <span className="brand-caption">{t.brandCaption}</span>
             </span>
           </NavLink>
-          <span className="stage-tag">
-            <span aria-hidden="true" className="stage-tag-dot" /> Staff access / prototype
-          </span>
+          <div className="masthead-right">
+            <LanguageSwitcher />
+            <span className="stage-tag">
+              <span aria-hidden="true" className="stage-tag-dot" /> {t.stageTag}
+            </span>
+          </div>
         </div>
         <nav className="primary-nav" aria-label="Primary navigation">
           {publicNavigation.map(({ to, label, end }) => (
@@ -86,7 +99,7 @@ export function SiteLayout() {
                 {roleNavigation[profile.role].label.replace(' workspace', '')}
               </span>
               <button className="nav-signout" type="button" onClick={() => void handleSignOut()}>
-                Sign out
+                {t.navSignOut}
               </button>
             </>
           ) : (
@@ -94,7 +107,7 @@ export function SiteLayout() {
               to="/staff/login"
               className={({ isActive }) => `nav-link${isActive ? ' nav-link-active' : ''}`}
             >
-              Staff sign-in
+              {t.navStaffLogin}
             </NavLink>
           )}
         </nav>

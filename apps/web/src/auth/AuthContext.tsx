@@ -32,6 +32,7 @@ export class StaffApiRequestError extends Error {
 interface StaffAuthContextValue {
   status: StaffAuthStatus;
   profile: StaffProfile | null;
+  session: StaffAuthSession | null;
   message: string | null;
   invitationPending: boolean;
   signIn(email: string, password: string): Promise<StaffProfile>;
@@ -71,6 +72,7 @@ export function AuthProvider({
 }: AuthProviderProps) {
   const [status, setStatus] = useState<StaffAuthStatus>(gateway ? 'loading' : 'unconfigured');
   const [profile, setProfile] = useState<StaffProfile | null>(null);
+  const [session, setSession] = useState<StaffAuthSession | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [invitationPending, setInvitationPending] = useState(
     gateway?.hasPendingInvitation() ?? false,
@@ -84,6 +86,7 @@ export function AuthProvider({
       verificationSequence.current += 1;
       activeSession.current = null;
       activeProfile.current = null;
+      setSession(null);
       setProfile(null);
       setStatus(gateway ? 'signed-out' : 'unconfigured');
       setMessage(nextMessage);
@@ -105,6 +108,7 @@ export function AuthProvider({
       const requestSequence = ++verificationSequence.current;
       activeSession.current = session;
       activeProfile.current = null;
+      setSession(session);
       setProfile(null);
       setStatus('loading');
       setMessage(null);
@@ -351,6 +355,7 @@ export function AuthProvider({
   const value: StaffAuthContextValue = {
     status,
     profile,
+    session,
     message,
     invitationPending,
     signIn,

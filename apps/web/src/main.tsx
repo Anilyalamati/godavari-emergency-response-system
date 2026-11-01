@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App.js';
 import { AuthProvider } from './auth/AuthContext.js';
+import { LanguageProvider } from './i18n/LanguageContext.js';
+import 'leaflet/dist/leaflet.css';
 import './styles.css';
 
 const rootElement = document.getElementById('root');
@@ -14,9 +16,11 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   </StrictMode>,
 );

@@ -135,3 +135,8 @@ if (
 export const browserAuthGateway: StaffAuthGateway | null = authClient
   ? createGateway(authClient)
   : null;
+
+export const supabaseClient: SupabaseClient | null = authClient;
+export function getSupabaseBrowserClient(): SupabaseClient | null {
+  return authClient;
+}

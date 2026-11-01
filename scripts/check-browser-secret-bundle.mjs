@@ -27,6 +27,7 @@ const build = spawnSync('pnpm', ['--filter', '@godavari/web', 'exec', 'vite', 'b
   env: buildEnvironment,
   stdio: 'inherit',
   timeout: 120_000,
+  shell: true,
 });
 
 if (build.error) {

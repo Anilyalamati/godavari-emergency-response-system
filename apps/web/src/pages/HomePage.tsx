@@ -3,7 +3,7 @@ import type { StaffRole } from '@godavari/shared';
 import { useStaffAuth } from '../auth/AuthContext.js';
 
 const publicDestinations = [
-  { number: '01', title: 'Public report', href: '/report', label: 'Open the report placeholder' },
+  { number: '01', title: 'Public report', href: '/report', label: 'Report an emergency' },
   { number: '02', title: 'Track a report', href: '/track', label: 'Open the tracking placeholder' },
 ] as const;
 
@@ -50,17 +50,17 @@ export function HomePage() {
       <section className="hero" aria-labelledby="home-title">
         <div className="hero-copy">
           <p className="eyebrow">
-            <span className="eyebrow-rule" /> Stage 03 / Staff access
+            <span className="eyebrow-rule" /> Stage 04 / Public reporting
           </p>
           <h1 id="home-title">A coordination idea, built with care.</h1>
           <p className="hero-description">
             A software-only hackathon prototype for exploring role-aware public-safety coordination.
-            Staff identity and permissions are checked by the API and database; this site is still
-            not an emergency service.
+            Stage 4 introduces live emergency report intake, atomic incident storage, and tracking
+            tokens. This site is still not an emergency service.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" to="/report">
-              Explore the public report page <span aria-hidden="true">→</span>
+              Report an emergency <span aria-hidden="true">→</span>
             </Link>
             <a className="button button-secondary" href="tel:112">
               Call 112 <span aria-hidden="true">↗</span>
@@ -77,13 +77,14 @@ export function HomePage() {
             <span />
           </div>
           <p className="aside-label">CURRENT SCOPE</p>
-          <p className="aside-title">Staff access foundation</p>
+          <p className="aside-title">Public emergency reporting</p>
           <p className="aside-copy">
-            Provisioned staff sessions, role-specific screens, and server-enforced data boundaries.
+            End-to-end report intake, atomic audit events, verified zone mapping, and tracking
+            tokens.
           </p>
           <div className="aside-divider" />
           <p className="aside-meta">
-            <span>Not implemented</span> Public report intake · dispatch · live response
+            <span>Not implemented</span> Automatic dispatch · live responder tracking
           </p>
         </div>
       </section>

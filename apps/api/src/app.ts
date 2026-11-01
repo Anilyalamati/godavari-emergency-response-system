@@ -5,16 +5,26 @@ import {
   ConfigurationItemSchema,
   ConfigurationUpsertSchema,
   HealthResponseSchema,
+  IncidentReviewInputSchema,
+  OperatorCloseInputSchema,
+  PaginatedIncidentListQuerySchema,
+  PublicIncidentCreateInputSchema,
+  PublicIncidentTrackingInputSchema,
+  PublicZoneSchema,
+  ResponderUpdateInputSchema,
   StaffInviteInputSchema,
   StaffMemberSchema,
   StaffProfileSchema,
   StaffProfileUpdateSchema,
+  TeamAssignmentInputSchema,
   TeamMembershipUpdateSchema,
+  TeamReassignmentInputSchema,
   TeamSummarySchema,
 } from '@godavari/shared';
 import type { ApiEnvironment } from './env.js';
 import { parseApiEnvironment } from './env.js';
 import { ApiError } from './http/ApiError.js';
+import { createRateLimiter, type RateLimiterOptions } from './http/rate-limiter.js';
 import {
   getAuthenticatedStaff,
   requireReporterContactPermission,
@@ -27,6 +37,8 @@ import { createStaffApiService, type StaffApiService } from './services/staff-se
 interface CreateAppOptions {
   environment?: ApiEnvironment;
   service?: StaffApiService | null;
+  rateLimiterOptions?: RateLimiterOptions;
+  allowedOrigins?: string[];
 }
 
 function parseRequest<T>(
@@ -72,9 +84,28 @@ const handleError: ErrorRequestHandler = (error: unknown, _request, response, ne
     return;
   }
 
+  const requestId = response.locals.requestId as string;
+
+  // Handle entity.too.large (Express body-parser 413)
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'type' in error &&
+    error.type === 'entity.too.large'
+  ) {
+    const payload = ApiErrorResponseSchema.parse({
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'Request payload exceeds the 32KB size limit.',
+        requestId,
+      },
+    });
+    response.status(413).json(payload);
+    return;
+  }
+
   const isKnownError = error instanceof ApiError;
   const statusCode = isKnownError ? error.statusCode : 500;
-  const requestId = response.locals.requestId as string;
   const payload = ApiErrorResponseSchema.parse({
     error: {
       code: isKnownError ? error.code : 'INTERNAL_ERROR',
@@ -91,10 +122,40 @@ export function createApp(options: CreateAppOptions = {}): Express {
     options.service === undefined ? createStaffApiService(environment) : options.service;
   const requireAuth = requireStaff(service);
 
+  const allowedOrigins = options.allowedOrigins ?? [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+  ];
+
   const app = express();
   app.disable('x-powered-by');
   app.use(assignRequestId);
+
+  // Stage 11: CORS restriction
+  app.use((request, response, next) => {
+    const origin = request.headers.origin;
+    if (origin && (allowedOrigins.includes(origin) || allowedOrigins.includes('*'))) {
+      response.setHeader('Access-Control-Allow-Origin', origin);
+      response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+      response.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-Request-Id, Accept',
+      );
+      response.setHeader('Access-Control-Max-Age', '86400');
+    }
+    if (request.method === 'OPTIONS') {
+      response.status(204).end();
+      return;
+    }
+    next();
+  });
+
   app.use(express.json({ limit: '32kb' }));
+
+  // Stage 11: Public intake rate limiter
+  const publicRateLimiter = createRateLimiter(options.rateLimiterOptions);
 
   app.get('/api/health', (_request, response) => {
     const health = HealthResponseSchema.parse({
@@ -108,6 +169,31 @@ export function createApp(options: CreateAppOptions = {}): Express {
     response.status(200).json(health);
   });
 
+  app.get('/api/zones', async (_request, response) => {
+    if (!service) throw new ApiError(503, 'SERVICE_UNAVAILABLE', 'Zone catalogue is unavailable.');
+    const zones = await service.listPublicZones();
+    sendData(
+      response,
+      zones.map((zone) => PublicZoneSchema.parse(zone)),
+    );
+  });
+
+  app.post('/api/incidents', publicRateLimiter, async (request, response) => {
+    if (!service)
+      throw new ApiError(503, 'SERVICE_UNAVAILABLE', 'Incident reporting is unavailable.');
+    const input = parseRequest(PublicIncidentCreateInputSchema, request.body);
+    const result = await service.submitPublicIncident(input);
+    sendData(response, result, result.isIdempotentReplay ? 200 : 201);
+  });
+
+  app.post('/api/incidents/track', publicRateLimiter, async (request, response) => {
+    if (!service)
+      throw new ApiError(503, 'SERVICE_UNAVAILABLE', 'Incident tracking is unavailable.');
+    const input = parseRequest(PublicIncidentTrackingInputSchema, request.body);
+    const result = await service.trackPublicIncident(input.trackingToken);
+    sendData(response, result, 200);
+  });
+
   app.get('/api/auth/me', requireAuth, (request, response) => {
     sendData(response, StaffProfileSchema.parse(staffSession(request).profile));
   });
@@ -119,7 +205,165 @@ export function createApp(options: CreateAppOptions = {}): Express {
     async (request, response) => {
       const session = staffSession(request);
       if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
-      sendData(response, await service.listIncidents(session.accessToken));
+
+      const hasQuery =
+        request.query.status !== undefined ||
+        request.query.category !== undefined ||
+        request.query.priority !== undefined ||
+        request.query.zoneId !== undefined ||
+        request.query.search !== undefined ||
+        request.query.page !== undefined ||
+        request.query.limit !== undefined;
+
+      const query = hasQuery
+        ? parseRequest(PaginatedIncidentListQuerySchema, request.query)
+        : undefined;
+
+      const incidents = query
+        ? await service.listIncidents(session.accessToken, query)
+        : await service.listIncidents(session.accessToken);
+      sendData(response, incidents);
+    },
+  );
+
+  app.get(
+    '/api/staff/incidents/:incidentId',
+    requireAuth,
+    requireRoles('OPERATOR', 'RESPONDER'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const detail = await service.getIncidentDetail(
+        session.accessToken,
+        incidentId,
+        session.profile,
+      );
+      sendData(response, detail);
+    },
+  );
+
+  app.patch(
+    '/api/staff/incidents/:incidentId/review',
+    requireAuth,
+    requireRoles('OPERATOR'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const input = parseRequest(IncidentReviewInputSchema, request.body);
+      const updated = await service.reviewIncident(
+        session.accessToken,
+        session.profile,
+        incidentId,
+        input,
+      );
+      sendData(response, updated);
+    },
+  );
+
+  app.get(
+    '/api/staff/incidents/:incidentId/eligible-teams',
+    requireAuth,
+    requireRoles('OPERATOR'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const eligible = await service.getEligibleTeams(
+        session.accessToken,
+        incidentId,
+        session.profile,
+      );
+      sendData(response, eligible);
+    },
+  );
+
+  app.post(
+    '/api/staff/incidents/:incidentId/assignments',
+    requireAuth,
+    requireRoles('OPERATOR'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const input = parseRequest(TeamAssignmentInputSchema, request.body);
+      const assignment = await service.assignTeam(
+        session.accessToken,
+        session.profile,
+        incidentId,
+        input,
+      );
+      sendData(response, assignment, 201);
+    },
+  );
+
+  app.post(
+    '/api/staff/incidents/:incidentId/reassign',
+    requireAuth,
+    requireRoles('OPERATOR'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const input = parseRequest(TeamReassignmentInputSchema, request.body);
+      const reassignment = await service.reassignTeam(
+        session.accessToken,
+        session.profile,
+        incidentId,
+        input,
+      );
+      sendData(response, reassignment, 201);
+    },
+  );
+
+  app.post(
+    '/api/staff/escalations/scan',
+    requireAuth,
+    requireRoles('OPERATOR', 'ADMIN'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const result = await service.scanEscalations(session.accessToken);
+      sendData(response, result);
+    },
+  );
+
+  app.post(
+    '/api/staff/incidents/:incidentId/responder-actions',
+    requireAuth,
+    requireRoles('RESPONDER'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const input = parseRequest(ResponderUpdateInputSchema, request.body);
+      const result = await service.responderUpdateIncident(
+        session.accessToken,
+        session.profile,
+        incidentId,
+        input,
+      );
+      sendData(response, result);
+    },
+  );
+
+  app.post(
+    '/api/staff/incidents/:incidentId/close',
+    requireAuth,
+    requireRoles('OPERATOR', 'ADMIN'),
+    async (request, response) => {
+      const session = staffSession(request);
+      if (!service) throw new ApiError(503, 'STAFF_DATA_UNAVAILABLE', 'Staff data is unavailable.');
+      const incidentId = routeUuid(request.params.incidentId, 'A valid incident ID is required.');
+      const input = parseRequest(OperatorCloseInputSchema, request.body ?? {});
+      const result = await service.operatorCloseIncident(
+        session.accessToken,
+        session.profile,
+        incidentId,
+        input,
+      );
+      sendData(response, result);
     },
   );
 

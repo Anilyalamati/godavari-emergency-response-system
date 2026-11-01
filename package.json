@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "pnpm --filter @godavari/shared build && concurrently -k -n api,web -c cyan,magenta \"pnpm --filter @godavari/api dev\" \"pnpm --filter @godavari/web dev\"",
     "dev:web": "pnpm --filter @godavari/web dev",
+    "preview:web": "pnpm --filter @godavari/web preview",
     "dev:api": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/api dev",
     "build": "pnpm --filter @godavari/shared build && pnpm --filter @godavari/api build && pnpm --filter @godavari/web build",
     "lint": "eslint .",

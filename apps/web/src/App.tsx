@@ -4,8 +4,10 @@ import { SiteLayout } from './components/SiteLayout.js';
 import { AdminPage } from './pages/AdminPage.js';
 import { HomePage } from './pages/HomePage.js';
 import { InviteAcceptPage } from './pages/InviteAcceptPage.js';
-import { NotFoundPage, PlaceholderPage, ReportPlaceholderPage } from './pages/PlaceholderPage.js';
+import { NotFoundPage } from './pages/PlaceholderPage.js';
 import { OperationalWorkspacePage } from './pages/OperationalWorkspacePage.js';
+import { ReportEmergencyPage } from './pages/ReportEmergencyPage.js';
+import { TrackIncidentPage } from './pages/TrackIncidentPage.js';
 import { StaffLoginPage } from './pages/StaffLoginPage.js';
 
 export function App() {
@@ -13,18 +15,8 @@ export function App() {
     <Routes>
       <Route element={<SiteLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="report" element={<ReportPlaceholderPage />} />
-        <Route
-          path="track"
-          element={
-            <PlaceholderPage
-              eyebrow="Public view / 02"
-              title="Track a report"
-              summary="Public incident tracking is not available. There are no public report records or tracking-token lookup services in this prototype."
-              detail="Public access to other reports is not part of this prototype."
-            />
-          }
-        />
+        <Route path="report" element={<ReportEmergencyPage />} />
+        <Route path="track" element={<TrackIncidentPage />} />
         <Route path="staff/login" element={<StaffLoginPage />} />
         <Route path="staff/accept-invite" element={<InviteAcceptPage />} />
         <Route
