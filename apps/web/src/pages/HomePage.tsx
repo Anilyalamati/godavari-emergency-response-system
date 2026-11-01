@@ -3,28 +3,22 @@ import type { StaffRole } from '@godavari/shared';
 import { useStaffAuth } from '../auth/AuthContext.js';
 
 const publicDestinations = [
-  { number: '01', title: 'Public report', href: '/report', label: 'Report an emergency' },
-  { number: '02', title: 'Track a report', href: '/track', label: 'Open the tracking placeholder' },
+  { href: '/report', title: 'Report an emergency', label: 'Report an emergency' },
+  { href: '/track', title: 'Track a report', label: 'Track an emergency report' },
 ] as const;
 
-const roleDestination: Record<
-  StaffRole,
-  { number: string; title: string; href: string; label: string }
-> = {
+const roleDestination: Record<StaffRole, { title: string; href: string; label: string }> = {
   OPERATOR: {
-    number: '03',
     title: 'Operator workspace',
     href: '/operator',
-    label: 'Open the operator workspace',
+    label: 'Open operator workspace',
   },
   RESPONDER: {
-    number: '03',
     title: 'Responder workspace',
     href: '/responder',
-    label: 'Open the responder workspace',
+    label: 'Open responder workspace',
   },
   ADMIN: {
-    number: '03',
     title: 'Administration',
     href: '/admin',
     label: 'Open administration',
@@ -32,7 +26,6 @@ const roleDestination: Record<
 };
 
 const signInDestination = {
-  number: '03',
   title: 'Staff sign-in',
   href: '/staff/login',
   label: 'Open staff sign-in',
@@ -49,14 +42,9 @@ export function HomePage() {
     <div className="home-page">
       <section className="hero" aria-labelledby="home-title">
         <div className="hero-copy">
-          <p className="eyebrow">
-            <span className="eyebrow-rule" /> Stage 04 / Public reporting
-          </p>
-          <h1 id="home-title">A coordination idea, built with care.</h1>
+          <h1 id="home-title">Godavari Safety</h1>
           <p className="hero-description">
-            A software-only hackathon prototype for exploring role-aware public-safety coordination.
-            Stage 4 introduces live emergency report intake, atomic incident storage, and tracking
-            tokens. This site is still not an emergency service.
+            Emergency response coordination and incident reporting.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" to="/report">
@@ -66,40 +54,14 @@ export function HomePage() {
               Call 112 <span aria-hidden="true">↗</span>
             </a>
           </div>
-          <p className="hero-footnote">
-            The 112 link opens your phone dialer if supported; telephone coverage is required.
-          </p>
-        </div>
-        <div className="hero-aside" aria-label="Prototype scope">
-          <div className="aside-mark" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-          <p className="aside-label">CURRENT SCOPE</p>
-          <p className="aside-title">Public emergency reporting</p>
-          <p className="aside-copy">
-            End-to-end report intake, atomic audit events, verified zone mapping, and tracking
-            tokens.
-          </p>
-          <div className="aside-divider" />
-          <p className="aside-meta">
-            <span>Not implemented</span> Automatic dispatch · live responder tracking
-          </p>
         </div>
       </section>
 
       <section className="destination-section" aria-labelledby="destination-title">
         <div className="section-heading">
-          <div>
-            <p className="eyebrow">
-              <span className="eyebrow-rule" /> Your available pages
-            </p>
-            <h2 id="destination-title">Browse this prototype</h2>
-          </div>
-          <span className="section-index">{destinations.length} DESTINATIONS</span>
+          <h2 id="destination-title">Quick Access</h2>
         </div>
-        <nav className="destination-list" aria-label="Prototype pages">
+        <nav className="destination-list" aria-label="Available pages">
           {destinations.map((item) => (
             <Link
               className="destination-row"
@@ -107,11 +69,7 @@ export function HomePage() {
               key={item.href}
               aria-label={item.label}
             >
-              <span className="destination-number">{item.number}</span>
               <span className="destination-title">{item.title}</span>
-              <span className="destination-status">
-                {item.href === '/staff/login' ? 'Provisioned staff' : 'Role checked'}
-              </span>
               <span className="destination-arrow" aria-hidden="true">
                 ↗
               </span>
@@ -120,14 +78,13 @@ export function HomePage() {
         </nav>
       </section>
 
-      <section className="scope-note" aria-label="Safety boundary">
+      <section className="scope-note" aria-label="Safety notice">
         <span className="scope-note-mark" aria-hidden="true">
-          i
+          !
         </span>
         <p>
-          <strong>For urgent help, do not use this prototype.</strong> Use the 112 alternative above
-          if telephone service is available. This website does not connect to police, ambulances,
-          hospitals, or emergency dispatch.
+          <strong>Test environment — not connected to emergency services.</strong> For
+          life-threatening emergencies, call 112 directly.
         </p>
       </section>
     </div>

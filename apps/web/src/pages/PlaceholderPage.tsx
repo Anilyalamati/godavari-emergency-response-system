@@ -65,13 +65,10 @@ export function ReportPlaceholderPage() {
 export function NotFoundPage() {
   return (
     <section className="placeholder-page" aria-labelledby="not-found-title">
-      <p className="eyebrow">
-        <span className="eyebrow-rule" /> Route / 404
-      </p>
       <h1 id="not-found-title">Page not found</h1>
-      <p className="placeholder-summary">This address is not part of the Stage 1 prototype.</p>
+      <p className="placeholder-summary">The requested page does not exist.</p>
       <Link className="text-link" to="/">
-        Return to overview <span aria-hidden="true">→</span>
+        Overview <span aria-hidden="true">→</span>
       </Link>
     </section>
   );

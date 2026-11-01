@@ -3,7 +3,6 @@ import type { StaffRole } from '@godavari/shared';
 import { useStaffAuth } from '../auth/AuthContext.js';
 import { useLanguage } from '../i18n/LanguageContext.js';
 import { LanguageSwitcher } from './LanguageSwitcher.js';
-import { ApiStatus } from './ApiStatus.js';
 
 const roleNavigation: Record<StaffRole, { to: string; label: string }> = {
   OPERATOR: { to: '/operator', label: 'Operator workspace' },
@@ -34,7 +33,7 @@ export function SiteLayout() {
         Skip to main content
       </a>
 
-      <aside className="safety-notice" role="note" aria-label="Prototype safety notice">
+      <aside className="safety-notice" role="note" aria-label="Safety notice">
         <span className="safety-icon" aria-hidden="true">
           !
         </span>
@@ -50,7 +49,7 @@ export function SiteLayout() {
         </a>
       </aside>
 
-      {language === 'te' && (
+      {language === 'te' && t.teluguReviewDisclaimer && (
         <aside className="telugu-review-banner" role="note" aria-label="భాష సమీక్ష నోటీసు">
           <span className="safety-icon" aria-hidden="true">
             ℹ
@@ -61,18 +60,14 @@ export function SiteLayout() {
 
       <header className="masthead">
         <div className="masthead-top">
-          <NavLink className="brand" to="/" aria-label="Godavari coordination prototype home">
+          <NavLink className="brand" to="/" aria-label="Godavari safety home">
             <img src="/godavari-mark.svg" alt="" width="42" height="42" />
             <span className="brand-copy">
               <span className="brand-name">{t.brandName}</span>
-              <span className="brand-caption">{t.brandCaption}</span>
             </span>
           </NavLink>
           <div className="masthead-right">
             <LanguageSwitcher />
-            <span className="stage-tag">
-              <span aria-hidden="true" className="stage-tag-dot" /> {t.stageTag}
-            </span>
           </div>
         </div>
         <nav className="primary-nav" aria-label="Primary navigation">
@@ -118,10 +113,9 @@ export function SiteLayout() {
       </main>
 
       <footer className="site-footer">
-        <span>Godavari Emergency Response Coordination System</span>
-        <span>Software-only hackathon prototype · Not for operational use</span>
+        <span>Godavari Safety</span>
+        <span>Test environment — not connected to emergency services.</span>
       </footer>
-      <ApiStatus />
     </div>
   );
 }

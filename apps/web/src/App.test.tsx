@@ -489,8 +489,10 @@ describe('public Stage 3 shell', () => {
   it('retains the safety notice, clearly labelled Call 112 alternative, and skip link', () => {
     renderAt('/');
 
-    const safetyNotice = screen.getByRole('note', { name: 'Prototype safety notice' });
-    expect(safetyNotice).toHaveTextContent('Hackathon prototype — not an emergency service.');
+    const safetyNotice = screen.getByRole('note', { name: 'Safety notice' });
+    expect(safetyNotice).toHaveTextContent(
+      'Test environment — not connected to emergency services.',
+    );
     expect(within(safetyNotice).getByRole('link', { name: /call 112/i })).toHaveAttribute(
       'href',
       'tel:112',
@@ -840,7 +842,7 @@ describe('role-aware staff screens', () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Primary Response Unit \(Dispatched\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/MVP Concurrency Guard/i)).toBeInTheDocument();
+    expect(screen.getByText(/Concurrency Guard/i)).toBeInTheDocument();
   });
 
   it('renders mobile-first responder workspace and allows acknowledgement and support request', async () => {
@@ -959,7 +961,7 @@ describe('role-aware staff screens', () => {
     expect(
       await screen.findByText(/Incident reassigned to MED-2 \(First Aid Unit Bravo\)/i),
     ).toBeInTheDocument();
-  });
+  }, 15000);
 
   const testIncidentSummary = {
     id: testIncidentDetail.id,

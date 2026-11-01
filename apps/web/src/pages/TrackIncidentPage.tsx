@@ -53,14 +53,9 @@ export function TrackIncidentPage() {
 
   return (
     <article className="track-page" aria-labelledby="track-page-title">
-      <p className="eyebrow">
-        <span className="eyebrow-rule" /> {t.trackEyebrow}
-      </p>
       <div className="track-heading-row">
         <h1 id="track-page-title">{t.trackHeading}</h1>
-        <span className="prototype-badge">Live lookup</span>
       </div>
-      <p className="placeholder-summary">{t.trackSummary}</p>
 
       {/* Tracking Input Form */}
       <section className="track-input-section" aria-label="Tracking token search">
@@ -91,15 +86,14 @@ export function TrackIncidentPage() {
               </button>
             </div>
             <p id="tracking-token-hint" className="field-hint">
-              Tracking tokens are cryptographic digests issued upon report intake. Tokens are never
-              exposed in URL parameters or server access logs.
+              Enter the 32-character tracking token received upon submission.
             </p>
           </div>
         </form>
 
         {error && (
           <div className="form-alert track-alert" role="alert">
-            <strong>Tracking lookup failed:</strong> {error}
+            <strong>Notice:</strong> {error}
           </div>
         )}
       </section>
@@ -121,12 +115,12 @@ export function TrackIncidentPage() {
 
           <div className="track-details-grid">
             <div className="track-detail-item">
-              <span className="detail-label">Incident Category</span>
+              <span className="detail-label">Category</span>
               <span className="detail-value">{trackingData.category}</span>
             </div>
 
             <div className="track-detail-item">
-              <span className="detail-label">Reported Location</span>
+              <span className="detail-label">Location</span>
               <span className="detail-value">
                 {trackingData.zoneName ? trackingData.zoneName : 'General riverfront area'}
                 {trackingData.landmark ? ` (${trackingData.landmark})` : ''}
@@ -134,7 +128,7 @@ export function TrackIncidentPage() {
             </div>
 
             <div className="track-detail-item">
-              <span className="detail-label">Reported Time</span>
+              <span className="detail-label">Reported</span>
               <span className="detail-value">
                 {new Date(trackingData.reportedAt).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -145,7 +139,7 @@ export function TrackIncidentPage() {
             </div>
 
             <div className="track-detail-item">
-              <span className="detail-label">Latest Operational Update</span>
+              <span className="detail-label">Updated</span>
               <span className="detail-value">
                 {new Date(trackingData.updatedAt).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -156,13 +150,13 @@ export function TrackIncidentPage() {
           </div>
 
           <div className="track-summary-box">
-            <span className="detail-label">Report Summary</span>
+            <span className="detail-label">Summary</span>
             <p className="track-summary-text">{trackingData.summary}</p>
           </div>
 
           <div className="track-privacy-notice" role="note">
             <span className="scope-note-mark" aria-hidden="true">
-              i
+              !
             </span>
             <p>{t.trackPrivacyNotice}</p>
           </div>
@@ -175,10 +169,10 @@ export function TrackIncidentPage() {
 
       <div className="track-footer-links">
         <Link className="text-link" to="/report">
-          ← Submit a new emergency report
+          ← Report an emergency
         </Link>
         <Link className="text-link" to="/">
-          Return to overview →
+          Overview →
         </Link>
       </div>
     </article>

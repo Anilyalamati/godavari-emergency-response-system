@@ -489,17 +489,12 @@ export function ReportEmergencyPage() {
   if (successReport) {
     return (
       <section className="report-success-view" aria-labelledby="report-success-title">
-        <p className="eyebrow">
-          <span className="eyebrow-rule" /> Incident reference / Stage 10
-        </p>
         <h1 id="report-success-title">{t.successTitle}</h1>
-        <p className="placeholder-summary">{t.successSummary}</p>
 
         {successReport.isIdempotentReplay && (
           <div className="form-alert" role="status" style={{ marginTop: '16px' }}>
-            <strong>Duplicate submission reconciled:</strong> This report was already recorded
-            previously. Your safe retry reconciled with the existing incident record without
-            creating a duplicate.
+            <strong>Reconciled:</strong> This report matches an earlier submission. No duplicate was
+            created.
           </div>
         )}
 
@@ -523,7 +518,7 @@ export function ReportEmergencyPage() {
             </span>
           </div>
           <div className="success-card-row">
-            <span className="success-label">Reported At (Original)</span>
+            <span className="success-label">Reported At</span>
             <span>{new Date(successReport.reportedAt).toLocaleString()}</span>
           </div>
           {successReport.zoneName && (
@@ -541,7 +536,6 @@ export function ReportEmergencyPage() {
 
           <div className="tracking-token-box">
             <p className="tracking-token-title">{t.trackingTokenTitle}</p>
-            <p className="tracking-token-help">{t.trackingTokenHelp}</p>
             <div className="tracking-token-display">
               <code>{successReport.trackingToken}</code>
               <button
@@ -556,29 +550,19 @@ export function ReportEmergencyPage() {
           </div>
         </div>
 
-        <div className="placeholder-boundary" role="note" style={{ marginTop: '24px' }}>
-          <span className="scope-note-mark" aria-hidden="true">
-            !
-          </span>
-          <p>
-            <strong>Life safety reminder:</strong> If the situation worsens or requires immediate
-            medical emergency evacuation, call <strong>112</strong> immediately from any telephone.
-          </p>
-        </div>
-
         <div className="hero-actions" style={{ marginTop: '28px' }}>
           <Link
             className="button button-primary"
             to="/track"
             state={{ trackingToken: successReport.trackingToken }}
           >
-            {t.trackIncidentBtn} →
+            {t.trackIncidentBtn}
           </Link>
           <button type="button" className="button button-secondary" onClick={handleStartNewReport}>
             {t.submitAnotherBtn}
           </button>
           <Link className="button button-secondary" to="/">
-            Return to overview
+            Overview
           </Link>
         </div>
       </section>
@@ -588,11 +572,7 @@ export function ReportEmergencyPage() {
   return (
     <div className="report-page-layout">
       <section className="report-intro" aria-labelledby="report-page-title">
-        <p className="eyebrow">
-          <span className="eyebrow-rule" /> {t.reportEyebrow}
-        </p>
         <h1 id="report-page-title">{t.reportHeading}</h1>
-        <p className="placeholder-summary">{t.reportSummaryHint}</p>
 
         {/* Local Queue & Connectivity Banner */}
         <div className="local-queue-status-bar" role="status" aria-live="polite">
@@ -604,7 +584,6 @@ export function ReportEmergencyPage() {
             <span className={`connectivity-tag ${isOnline ? 'online' : 'offline'}`}>
               {isOnline ? `🟢 ${t.queueOnline}` : `🔴 ${t.queueOffline}`}
             </span>
-            <span className="queue-age-tag">Drafted {formatQueueAge(draftCreatedAt)}</span>
           </div>
 
           {(summary.length > 0 || landmark.length > 0) && (
@@ -612,7 +591,7 @@ export function ReportEmergencyPage() {
               type="button"
               className="btn-clear-draft"
               onClick={handleClearDraft}
-              title="Delete local draft and contact details from device storage"
+              title="Delete local draft"
             >
               🗑️ {t.queueClearDraft}
             </button>
@@ -624,12 +603,10 @@ export function ReportEmergencyPage() {
           <div className="stale-report-modal" role="dialog" aria-labelledby="stale-modal-title">
             <h3 id="stale-modal-title">Confirm Active Emergency Status</h3>
             <p>
-              This report was originally drafted <strong>{formatQueueAge(draftCreatedAt)}</strong>.
-              Emergency conditions can change rapidly.
+              This draft is <strong>{formatQueueAge(draftCreatedAt)}</strong> old.
             </p>
             <p>
-              Please confirm:{' '}
-              <strong>Is this emergency situation still active and unresolved?</strong>
+              <strong>Is this emergency still active and unresolved?</strong>
             </p>
             <div className="stale-modal-actions">
               <button
@@ -637,17 +614,17 @@ export function ReportEmergencyPage() {
                 className="button button-primary"
                 onClick={handleConfirmStaleAndSend}
               >
-                Yes, Emergency is Active — Transmit Now
+                Yes, Emergency is Active — Send Now
               </button>
               <button
                 type="button"
                 className="button button-secondary"
                 onClick={() => setStalePromptNeeded(false)}
               >
-                Review Report Details
+                Review Report
               </button>
               <button type="button" className="btn-link text-danger" onClick={handleClearDraft}>
-                Discard Stale Draft
+                Discard Draft
               </button>
             </div>
           </div>
@@ -660,23 +637,10 @@ export function ReportEmergencyPage() {
         >
           <div className="call-banner-copy">
             <strong>{t.emergencyCallBannerTitle}</strong>
-            <p>{t.emergencyCallBannerText}</p>
           </div>
           <a className="button button-primary call-112-btn" href="tel:112">
             Call 112 now <span aria-hidden="true">↗</span>
           </a>
-        </div>
-
-        <div className="placeholder-boundary" role="note" style={{ marginTop: '24px' }}>
-          <span className="scope-note-mark" aria-hidden="true">
-            i
-          </span>
-          <p>
-            <strong>Local Queue & Privacy:</strong> Unsent drafts are saved locally in your browser
-            (IndexedDB) under client request ID <code>{clientRequestId.slice(0, 8)}…</code> to
-            survive connection drops. Drafts are never uploaded until you transmit them and expire
-            automatically after 24 hours.
-          </p>
         </div>
       </section>
 
@@ -798,10 +762,6 @@ export function ReportEmergencyPage() {
             {/* GPS coordinates */}
             <div className="gps-section">
               <span className="gps-label">GPS Device Location (Optional)</span>
-              <p className="field-hint">
-                Location is requested <strong>only upon explicit click</strong>. You can submit
-                without GPS.
-              </p>
 
               {geoState.status === 'idle' && (
                 <button
@@ -896,9 +856,14 @@ export function ReportEmergencyPage() {
           {/* Error display */}
           {formError && (
             <div id={`${formId}-form-error`} className="form-alert" role="alert">
-              <strong>Submission notice:</strong> {formError}
+              <strong>Notice:</strong> {formError}
             </div>
           )}
+
+          {/* Test Environment Notice near submission */}
+          <p className="submission-safety-notice" role="note">
+            Test environment — not connected to emergency services.
+          </p>
 
           {/* Submit Action */}
           <div className="form-actions-bar">

@@ -266,9 +266,6 @@ function InvitationForm({ teams, onInvited }: InvitationFormProps) {
   return (
     <form className="admin-form" onSubmit={submit}>
       <h3>Invite staff</h3>
-      <p className="form-footnote">
-        Only verified administrators can send invitations. No public registration is available.
-      </p>
       <label htmlFor="invite-name">Staff display name</label>
       <input
         id="invite-name"
@@ -507,27 +504,11 @@ export function AdminPage() {
 
   return (
     <section className="admin-page" aria-labelledby="admin-title">
-      <p className="eyebrow">
-        <span className="eyebrow-rule" /> Configuration / verified administrator
-      </p>
       <h1 id="admin-title">Administration</h1>
-      <p className="placeholder-summary">
-        Manage provisioned staff roles, team membership, explicit contact permissions, and
-        non-secret configuration. Changes are checked by the API and database.
-      </p>
-      <div className="placeholder-boundary workspace-access-note" role="note">
-        <span className="scope-note-mark" aria-hidden="true">
-          i
-        </span>
-        <p>
-          Administrators cannot change their own role or team membership. Reporter-contact
-          permission is exceptional and must be explicitly approved. Do not store credentials here.
-        </p>
-      </div>
 
       {loading ? (
         <p className="workspace-empty" role="status">
-          Loading administrator data…
+          Loading…
         </p>
       ) : problem ? (
         <p className="form-alert" role="alert">
@@ -537,13 +518,7 @@ export function AdminPage() {
         <>
           <section className="admin-section" aria-labelledby="staff-heading">
             <div className="section-heading">
-              <div>
-                <p className="eyebrow">
-                  <span className="eyebrow-rule" /> Controlled accounts
-                </p>
-                <h2 id="staff-heading">Staff access</h2>
-              </div>
-              <span className="section-index">NO PUBLIC SIGN-UP</span>
+              <h2 id="staff-heading">Staff access</h2>
             </div>
             <div className="admin-staff-grid">
               <InvitationForm teams={teams} onInvited={refreshStaff} />
@@ -562,13 +537,7 @@ export function AdminPage() {
           </section>
           <section className="admin-section" aria-labelledby="configuration-heading">
             <div className="section-heading">
-              <div>
-                <p className="eyebrow">
-                  <span className="eyebrow-rule" /> Non-secret values only
-                </p>
-                <h2 id="configuration-heading">Configuration</h2>
-              </div>
-              <span className="section-index">ADMIN ONLY</span>
+              <h2 id="configuration-heading">Configuration</h2>
             </div>
             <ConfigurationForm items={configuration} onSaved={refreshConfiguration} />
           </section>

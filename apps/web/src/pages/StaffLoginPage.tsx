@@ -33,25 +33,10 @@ export function StaffLoginPage() {
   return (
     <section className="staff-auth-page" aria-labelledby="staff-login-title">
       <div className="staff-auth-copy">
-        <p className="eyebrow">
-          <span className="eyebrow-rule" /> Staff access / 03
-        </p>
         <h1 id="staff-login-title">Staff sign-in</h1>
-        <p className="placeholder-summary">
-          Staff accounts are provisioned by an administrator. There is no public registration or
-          role selection.
-        </p>
-        <div className="placeholder-boundary" role="note">
-          <span className="scope-note-mark" aria-hidden="true">
-            i
-          </span>
-          <p>
-            Staff routes and APIs independently verify the Supabase session and server-controlled
-            profile. A visible link is not an access grant.
-          </p>
-        </div>
+        <p className="placeholder-summary">Authorized accounts only.</p>
         <Link className="text-link" to="/">
-          Return to the public overview <span aria-hidden="true">→</span>
+          Overview <span aria-hidden="true">→</span>
         </Link>
       </div>
 
@@ -60,13 +45,11 @@ export function StaffLoginPage() {
           <div className="auth-state-panel auth-state-panel-compact" role="status">
             <h2>Staff sign-in is not configured</h2>
             <p>
-              Set both browser-safe Supabase URL and publishable-key values, then configure the
-              API’s matching server-side settings.
+              Supabase authentication settings are missing. Configure the environment variables.
             </p>
           </div>
         ) : (
           <form className="staff-form" onSubmit={handleSubmit}>
-            <p className="eyebrow">Verified staff accounts only</p>
             <label htmlFor="staff-email">Work email</label>
             <input
               id="staff-email"
@@ -110,8 +93,7 @@ export function StaffLoginPage() {
               {!busy && <span aria-hidden="true">→</span>}
             </button>
             <p className="form-footnote">
-              No self-registration. If you do not have an invited staff account, contact the
-              authorized administrator.
+              Authorized staff access only. Contact an administrator for an account.
             </p>
           </form>
         )}

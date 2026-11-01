@@ -21,20 +21,10 @@ interface OperationalWorkspacePageProps {
 
 const copy = {
   OPERATOR: {
-    eyebrow: 'Control room / verified operator',
     title: 'Operator workspace',
-    summary:
-      'Control-room queue for rapid intake, location inspection, prioritization, duplicate linking, and incident review.',
-    access:
-      'The API verifies your staff profile and the database applies operator-scoped row-level security.',
   },
   RESPONDER: {
-    eyebrow: 'Field response / verified responder',
     title: 'Responder workspace',
-    summary:
-      'Mobile-first response interface. Inspect assigned incidents, acknowledge dispatch, update en-route/on-scene status, request support, and report resolution outcomes.',
-    access:
-      'The API verifies your staff profile; database policies restrict incident rows to your active team assignments.',
   },
 } as const;
 
@@ -640,13 +630,9 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
 
   return (
     <section className="workspace-page" aria-labelledby="workspace-title">
-      <p className="eyebrow">
-        <span className="eyebrow-rule" /> {content.eyebrow}
-      </p>
       <h1 id="workspace-title">{content.title}</h1>
-      <p className="placeholder-summary">{content.summary}</p>
 
-      {/* Stage 9: Realtime Live Status Indicator */}
+      {/* Realtime Live Status Indicator */}
       <div className="realtime-status-bar" role="status" aria-live="polite">
         <div className="realtime-status-pill-group">
           <span className={`realtime-pill realtime-${connectionStatus.toLowerCase()}`}>
@@ -683,7 +669,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
         </div>
       )}
 
-      {/* Stage 9: View Mode Controls for Operator */}
+      {/* View Mode Controls for Operator */}
       {role === 'OPERATOR' && (
         <div className="workspace-view-controls">
           <div className="workspace-view-toggle" role="group" aria-label="Control room view">
@@ -711,18 +697,6 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
           </div>
         </div>
       )}
-
-      <div className="placeholder-boundary workspace-access-note" role="note">
-        <span className="scope-note-mark" aria-hidden="true">
-          i
-        </span>
-        <p>
-          {content.access}{' '}
-          {profile?.canAccessReporterContacts
-            ? 'Your account has permission to view verified reporter callback details.'
-            : 'Reporter contact details are kept separate and require explicit authorization.'}
-        </p>
-      </div>
 
       {role === 'OPERATOR' ? (
         /* ── Operator Control Room Master-Detail Interface ── */
@@ -1240,9 +1214,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
                           )}
 
                           <p className="active-assignment-note">
-                            MVP Concurrency Guard: Exactly one active primary team per incident.
-                            Double-booking is strictly prevented by database locks and partial
-                            unique constraints.
+                            Concurrency Guard: Exactly one active primary team per incident.
                           </p>
 
                           {/* Stage 8 Operator Reassignment Workflow */}
@@ -1354,7 +1326,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
                                         id="reassign-reason"
                                         value={reassignReason}
                                         onChange={(e) => setReassignReason(e.target.value)}
-                                        placeholder="Document mandatory reason for reassignment (e.g. Primary team uncontactable after 60s prototype deadline)..."
+                                        placeholder="Reason for reassignment…"
                                         rows={3}
                                         className="form-input form-textarea"
                                         required
@@ -1373,10 +1345,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
                                         }
                                         className="form-input"
                                       >
-                                        <option value={60}>
-                                          60 seconds (Prototype demo setting - not an official
-                                          standard)
-                                        </option>
+                                        <option value={60}>60 seconds (Short deadline)</option>
                                         <option value={300}>5 minutes (Urgent Escalation)</option>
                                         <option value={600}>10 minutes (Rapid Response)</option>
                                         <option value={900}>15 minutes (Standard Deadline)</option>
@@ -1539,9 +1508,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
                                 className="form-input"
                                 style={{ maxWidth: '240px' }}
                               >
-                                <option value={1}>
-                                  60 seconds (Prototype demo setting - not an official standard)
-                                </option>
+                                <option value={1}>60 seconds (Short deadline)</option>
                                 <option value={10}>10 minutes (Urgent Response)</option>
                                 <option value={15}>15 minutes (Standard Deadline)</option>
                                 <option value={30}>30 minutes (Extended Deadline)</option>
@@ -1822,7 +1789,6 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
               >
                 {responderShowMap ? '📋 Show List Only' : '🗺️ View Map & Landmarks'}
               </button>
-              <span className="section-index">ACTIVE TEAM DISPATCH</span>
             </div>
           </div>
 
@@ -1857,7 +1823,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
 
           {loading ? (
             <p className="workspace-empty" role="status">
-              Verifying team dispatch assignments…
+              Loading…
             </p>
           ) : error ? (
             <p className="form-alert" role="alert">
@@ -1869,10 +1835,7 @@ export function OperationalWorkspacePage({ role }: OperationalWorkspacePageProps
                 ✓
               </span>
               <h3>No Active Dispatches</h3>
-              <p className="workspace-empty">
-                No incident records are currently assigned to your team. Your team status is
-                available in the control room.
-              </p>
+              <p className="workspace-empty">No active assignments.</p>
             </div>
           ) : (
             <ul className="workspace-record-list" role="list">
